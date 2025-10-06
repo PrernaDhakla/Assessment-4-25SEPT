@@ -4,7 +4,7 @@ author: "PRERNA DHAKLA"
 date: "2025-10-06"
 output:
   html_document: default
-  pdf_document: default 
+  pdf_document: default
 ---
 
 #Downloading the whole set of coding DNA sequences for E. coli and your organism of interest and calculating how many coding sequences are present in these organisms in the form of a table. Describe any differences between the two organisms.
