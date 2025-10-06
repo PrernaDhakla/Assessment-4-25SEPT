@@ -1,0 +1,175 @@
+---
+title: "Part-2_myscript"
+author: "PRERNA DHAKLA"
+date: "2025-10-06"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+#Downloading the whole set of coding DNA sequences for E. coli and your organism of interest and calculating how many coding sequences are present in these organisms in the form of a table. Describe any differences between the two organisms.
+The code downloaded the complete coding DNA sequence (CDS) files for E. coli and Clostridium baratii from the Ensembl database. Using the read.fasta() function, the CDS were loaded, and the length() function was applied to calculate the total number of coding sequences for each organism. These values were displayed in a table, allowing direct comparison of CDS counts between the two species.
+
+```{r}
+library("R.utils")
+
+URL="http://ftp.ensemblgenomes.org/pub/bacteria/release-53/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655_gca_000005845/cds/Escherichia_coli_str_k_12_substr_mg1655_gca_000005845.ASM584v2.cds.all.fa.gz"
+download.file(URL,destfile="Escherichia_coli_str_k_12_substr_mg1655_gca_000005845.ASM584v2.cds.all.fa.gz")
+#gunzip("Escherichia_coli_str_k_12_substr_mg1655_gca_000005845.ASM584v2.cds.all.fa.gz")
+list.files() 
+library("seqinr")
+
+library("R.utils")
+URL="https://ftp.ensemblgenomes.ebi.ac.uk/pub/bacteria/release-62/fasta/bacteria_14_collection/clostridium_baratii_gca_001405755/cds/Clostridium_baratii_gca_001405755.14207_7_79.cds.all.fa.gz"
+download.file(URL,destfile="Clostridium_baratii_gca_001405755.14207_7_79.cds.all.fa.gz")
+#gunzip("Clostridium_baratii_gca_001405755.14207_7_79.cds.all.fa.gz")
+list.files()
+library("seqinr")
+
+cds_ecoli <- seqinr::read.fasta("Escherichia_coli_str_k_12_substr_mg1655_gca_000005845.ASM584v2.cds.all.fa")
+cds_Clostridiumbaratii<- seqinr::read.fasta("Clostridium_baratii_gca_001405755.14207_7_79.cds.all.fa")
+length_Clostridiumbaratii <- length(cds_Clostridiumbaratii)
+length_ecoli <- length(cds_ecoli)
+
+DNA_length <- data.frame(
+  Organism = c("E. coli", "Clostridium Baratii"),
+  DNA_Length = c(length_ecoli, length_Clostridiumbaratii)
+)
+print(DNA_length)
+```
+
+#Calculating how much coding DNA is there in total for these two organisms in the form of a table. Describing differences between the two organisms.
+The code calculated the total coding DNA length for E. coli and Clostridium baratii by unlisting their CDS sequences and applying the length() function. The results were stored in a data frame and printed as a table, which allowed a direct comparison of the total coding DNA between the two organisms.
+
+```{r}
+ecoli_total <- length(unlist(cds_ecoli))
+Clostridiumbaratii_total <- length(unlist(cds_Clostridiumbaratii))
+
+Coding_DNA <- data.frame(
+  Organism = c("E. coli", "Clostridium Baratii"),
+  Total_Coding_DNA_Length = c(ecoli_total, Clostridiumbaratii_total)
+)
+print(Coding_DNA)
+```
+
+#Calculating the length of all coding sequences in these two organisms and Making a boxplot of coding sequence length in these organisms. The mean and median coding sequence length of these two organisms Describing differences between the two organisms.
+The code calculated the length of all coding sequences for E. coli and Clostridium baratii using summary() and converted them to numeric values. It then computed the total, mean, and median coding sequence lengths for each organism. Finally, boxplots were generated to display and compare the distribution of coding sequence lengths between the two species.
+
+```{r}
+len_ecoli <- as.numeric(summary(cds_ecoli)[,1])
+len_Clostridiumbaratii <- as.numeric(summary(cds_Clostridiumbaratii)[,1])
+
+len_ecoli <- as.numeric(summary(cds_ecoli)[,1])
+sum(len_ecoli)
+mean(len_ecoli)
+median(len_ecoli)
+boxplot(len_ecoli,ylab="sequence length (bp) for E Coli")
+
+len_Clostridiumbaratii <- as.numeric(summary(cds_Clostridiumbaratii)[,1])
+sum(len_Clostridiumbaratii)
+mean(len_Clostridiumbaratii)
+median(len_Clostridiumbaratii)
+boxplot(len_Clostridiumbaratii,ylab="sequence length (bp) for Clostridiumbaratii")
+```
+
+#Calculating the frequency of DNA bases in the total coding sequences for both organisms. Perform the same calculation for the total protein sequence. Creating bar plots for nucleotide and amino acid frequency. Describing the differences between the two organisms.
+The code calculated nucleotide frequencies for the coding sequences of E. coli and Clostridium baratii using the count() function. The CDS were translated into proteins, and amino acid frequencies were then determined. Bar plots were generated to visualize both nucleotide and amino acid composition, enabling direct comparison of sequence characteristics between the two organisms.
+
+```{r}
+dna_composition_ecoli <- count(unlist(cds_ecoli),1)
+dna_composition_Clostridiumbaratii <- count(unlist(cds_Clostridiumbaratii),1)
+
+barplot(dna_composition_ecoli,xlab="nucleotides",ylab="frequency", main="E coli CDS composition")
+barplot(dna_composition_Clostridiumbaratii,xlab="nucleotides",ylab="frequency", main="Clostridiumbaratii CDS composition")
+
+
+prot_Clostridiumbaratii <- lapply(cds_Clostridiumbaratii, translate)
+prot_ecoli <- lapply(cds_ecoli, translate)
+
+aa <- unique(prot_ecoli[[2]])
+aa <- aa[aa != "*"]
+length(aa)
+
+prot_count_ecoli <- count(unlist(prot_ecoli),wordsize=1,alphabet=aa)
+print(prot_count_ecoli)
+
+prot_count_Clostridiumbaratii <- count(unlist(prot_Clostridiumbaratii),wordsize=1,alphabet=aa)
+
+barplot(prot_count_ecoli,xlab="amino acids",ylab="frequency", main="E coli amino acid composition")
+barplot(prot_count_Clostridiumbaratii,xlab="amino acids",ylab="frequency", main="Clostridiumbaratii amino acid composition")
+```
+
+#Creating a codon usage table and quantify the codon usage bias among all coding sequences. Describing any differences between the two organisms with respect to their codon usage bias. Provided charts in support of observations.
+The code generated codon usage tables for E. coli and Clostridium baratii using the uco() function with RSCU values. It ranked codons to identify the most frequently and least frequently used ones and displayed the top 10 in each category. Bar plots were created to visualize codon usage bias for both organisms. This approach provided a clear comparison of codon preference, highlighting similarities and differences in codon bias between E. coli and Clostridium baratii.
+
+```{r}
+codon_Clostridiumbaratii <- uco(unlist(cds_Clostridiumbaratii),index="rscu",as.data.frame=TRUE)
+
+codon_ecoli <- uco(unlist(cds_ecoli),index="rscu",as.data.frame=TRUE)
+
+
+sorted_ecoli <- codon_ecoli[order(codon_ecoli$RSCU),]
+top10codonsecoli <- head(sorted_ecoli, 10)
+print(top10codonsecoli)
+
+reverse_sorted_ecoli <- codon_ecoli[order(-codon_ecoli$RSCU),]
+top10codonsecolireverse <- head(reverse_sorted_ecoli, 10)
+print(top10codonsecolireverse)
+
+sorted_Clostridiumbaratii <- codon_Clostridiumbaratii[order(codon_Clostridiumbaratii$RSCU),]
+top10codonsClostridiumbaratii <- head(sorted_Clostridiumbaratii, 10)
+print(top10codonsClostridiumbaratii)
+
+reverse_sorted_Clostridiumbaratii <- codon_Clostridiumbaratii[order(-codon_Clostridiumbaratii$RSCU),]
+top10codonsClostridiumbaratiireverse <- head(reverse_sorted_Clostridiumbaratii, 10)
+print(top10codonsClostridiumbaratiireverse)
+
+
+barplot(top10codonsecoli$RSCU, names.arg = top10codonsecoli$codon , xlab ="codons",
+        ylab ="RSCU",
+        main ="Codon usage bias")
+ 
+barplot(top10codonsClostridiumbaratii$RSCU, names.arg = top10codonsClostridiumbaratii$codon , xlab ="codons",
+        ylab ="RSCU",
+        main ="Codon usage bias")
+
+barplot(top10codonsecolireverse$RSCU, names.arg = top10codonsecolireverse$codon , xlab ="codons",
+        ylab ="RSCU",
+        main ="Codon usage bias")
+ 
+barplot(top10codonsClostridiumbaratiireverse$RSCU, names.arg = top10codonsClostridiumbaratiireverse$codon , xlab ="codons",
+        ylab ="RSCU",
+        main ="Codon usage bias")
+```
+#In the organism of interest, identifying 10 protein sequence k-mers of length 3-5 which are the most over- and under-represented k-mers in your organism of interest. Are these k-mers also over- and under-represented in E. coli to a similar extent? Providing plots to support your observations, thinking of these sequences are present at different levels in the genomes of these organisms
+The code identified protein sequence k-mers of length 3 in E. coli and Clostridium baratii by unlisting the translated protein sequences and using the count() function. The frequencies of these k-mers were calculated, and the top 10 most frequent k-mers were displayed for each organism. This allowed comparison of over- and under-represented amino acid patterns between the two species, showing how certain motifs are more common in one organism than the other.
+
+```{r}
+aa <- unique(prot_ecoli[[2]])
+aa <- aa[aa != "*"]
+length(aa)
+
+
+protsecoli <- unlist(prot_ecoli)
+
+mycounts_ecoli <- count(protsecoli,wordsize=3,alphabet=aa)
+
+str(mycounts_ecoli)
+
+head(mycounts_ecoli)
+
+
+prots_Clostridiumbaratii <- unlist(prot_Clostridiumbaratii)
+
+mycounts_Clostridiumbaratii <- count(prots_Clostridiumbaratii,wordsize=3,alphabet=aa)
+
+str(mycounts_Clostridiumbaratii)
+
+head(mycounts_Clostridiumbaratii)
+
+myfreq_Clostridiumbaratii <- count(prots_Clostridiumbaratii,wordsize=3,alphabet=aa,freq=TRUE)
+myfreqecoli <- count(protsecoli,wordsize=3,alphabet=aa,freq=TRUE)
+head(myfreq_Clostridiumbaratii, 10)
+head(myfreqecoli,10)
+```
+
