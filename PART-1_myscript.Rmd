@@ -1,0 +1,143 @@
+---
+title: "ASEEESSMENT-4 PART1 25SEPT"
+author: "PRERNA DHAKLA"
+date: "2025-09-25"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+# Download TSV File and making a new column which is the mean of the other columns showing  a table of values for the first six genes.
+The TSV file was downloaded from GitHub using download.file() and saved as gene_expression.tsv. It was then read into R with read.delim() and the first six rows of the dataset were displayed using head().
+
+```{r}
+library("R.utils")
+
+URL="https://raw.githubusercontent.com/ghazkha/Assessment4/refs/heads/main/gene_expression.tsv"
+download.file(URL,destfile="gene_expression.tsv")
+list.files()
+
+cds <- read.delim("gene_expression.tsv")
+head(cds)
+```
+```{r}
+column_express <- read.delim("gene_expression.tsv")
+head(column_express)
+
+```
+
+
+```{r}
+rownames(column_express) <- column_express[,1]
+
+column_express <- column_express[,-1]
+
+column_express$mean_column <- rowMeans(column_express)
+
+head(column_express)
+print(head)
+
+```
+
+#List the 10 genes with the highest mean expression 
+The dataset was sorted in descending order based on the mean expression column using the order() function. This allowed identification of the genes with the highest mean expression, from which the top 10 can be listed.
+
+```{r}
+sorted <- column_express[order(-column_express$mean_column),]
+
+```
+
+#Determine the number of genes with a mean <10
+Genes with a mean expression value less than 10 were identified using the which() function. This created a subset of low-mean genes, allowing the total number of such genes to be determined.
+
+```{r}
+low_mean <- column_express[which(column_express$mean_column < 10),]
+
+```
+
+#Histogram ploting
+A histogram was generated using the hist() function to visualize the distribution of mean gene expression values. The x-axis represented mean expression, the y-axis showed frequency, and the plot title indicated it was the mean gene expression histogram.
+
+```{r}
+hist(sorted$mean_column,xlab="Mean Expression",ylab="Frequency",main="Mean Gene Expression")
+```
+#Download CSv File
+The CSV file growth_data.csv was downloaded from GitHub using the download.file() function and saved locally for further analysis.
+
+```{r}
+URL="https://raw.githubusercontent.com/ghazkha/Assessment4/refs/heads/main/growth_data.csv"
+download.file(URL,destfile="growth_data.csv")
+
+```
+#Column Name shown
+The dataset was sorted in descending order by the mean expression column, and the head() function was used to display the top 10 genes, showing their names and corresponding values.
+
+```{r}
+highgene <- column_express[order(column_express$mean_column, decreasing = TRUE), ]
+head(highgene,10)
+```
+
+#Calculating the mean and standard deviation of tree circumference at the start and end of the study at both sites.
+The dataset was divided into northeast and southwest sites using the grep() function. For each site, the mean and standard deviation of tree circumference were calculated at the beginning (2005) and end (2020) of the study, providing a summary of growth patterns at both locations.
+
+```{r}
+growth <- read.csv("growth_data.csv")
+print(growth)
+
+
+North_E <- growth[grep("northeast", growth$Site), ]
+South_W <- growth[grep("southwest", growth$Site), ]
+
+mean(North_E$Circumf_2005_cm)
+mean(North_E$Circumf_2020_cm)
+mean(South_W$Circumf_2005_cm)
+mean(South_W$Circumf_2020_cm)
+
+
+sd(North_E$Circumf_2005_cm)
+sd(North_E$Circumf_2020_cm)
+sd(South_W$Circumf_2005_cm)
+sd(South_W$Circumf_2020_cm)
+
+```
+
+#Making a box plot of tree circumference at the start and end of the study at both sites.
+Boxplots were created to compare tree circumference at the start (2005) and end (2020) of the study for both northeast and southwest sites. These plots visually display the distribution and variation in growth over time at each location.
+
+```{r}
+boxplot(North_E$Circumf_2005_cm, North_E$Circumf_2020_cm,
+        ylab="Circumference",
+        main="Circumference in Northeast in cm",
+        names = c("2005","2020"))
+
+boxplot(South_W$Circumf_2005_cm, South_W$Circumf_2020_cm,
+        ylab="Circumference",
+        main="Circumference in Southwest in cm",
+        names = c("2005","2020"))
+
+```
+
+#Calculating the mean growth over the last 10 years at each site.
+The mean growth at each site was calculated by subtracting the 2005 tree circumference values from the 2020 values. The mean() function was then applied to these differences to give the average growth for the northeast and southwest sites.
+
+```{r}
+Northeast_contrast <- North_E$Circumf_2020_cm - North_E$Circumf_2005_cm
+Northeast_mean_contrast <- mean(Northeast_contrast)
+
+Southwest_contrast <- South_W$Circumf_2020_cm - South_W$Circumf_2005_cm
+Southwest_mean_contrast <- mean(Southwest_contrast)
+print(Southwest_mean_contrast) 
+print(Northeast_mean_contrast)
+```
+
+#Use the t.test to estimate the p-value that the 10 year growth is different at the two sites.
+A two-sample t-test was performed using the t.test() function to compare the 10-year growth between the northeast and southwest sites. The resulting p-value was extracted with $p.value and printed, providing a statistical measure of whether the growth differences between the two sites are significant.
+
+```{r}
+t_test_result <- t.test(Northeast_contrast, Southwest_contrast)
+p_value <- t_test_result$p.value
+print(p_value)
+```
+
+
